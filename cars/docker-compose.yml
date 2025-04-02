@@ -1,0 +1,27 @@
+services:
+  db:
+    image: postgres
+    restart: always
+    shm_size: 128mb
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    networks:
+      - net
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - "3333:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: root@gmail.com
+      PGADMIN_DEFAULT_PASSWORD: password
+    networks:
+      - net
+
+networks:
+  net:
+    driver: bridge

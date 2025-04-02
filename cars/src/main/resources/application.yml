@@ -1,0 +1,16 @@
+spring:
+    application.name: cars
+    datasource:
+        driver-class-name: org.postgresql.Driver
+        url: jdbc:postgresql://localhost:5432/postgres
+        username: user
+        password: password
+#    liquibase:
+#        change-log: classpath:db/changelog/liquibase-master.xml
+    jpa:
+        open-in-view: false
+        hibernate.ddl-auto: create
+        show-sql: true
+    jackson:
+        mapper:
+            accept-case-insensitive-enums: true
