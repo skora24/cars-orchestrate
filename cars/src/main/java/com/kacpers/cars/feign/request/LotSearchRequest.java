@@ -27,13 +27,13 @@ public record LotSearchRequest(
     ) {
     }
 
-    public static LotSearchRequest latest() {
+    public static LotSearchRequest latest(int page) {
         return new LotSearchRequest(
             List.of("*"),
-            new LotSearchRequest.Filter(List.of("expected_sale_assigned_ts_utc:[NOW/DAY-1DAY TO NOW/DAY]")),
+            new LotSearchRequest.Filter(List.of()),
             List.of("salelight_priority asc", "member_damage_group_priority asc", "auction_date_type desc", "auction_date_utc asc"),
-            0,
-            20,
+            page,
+            100,
             0,
             false,
             true,

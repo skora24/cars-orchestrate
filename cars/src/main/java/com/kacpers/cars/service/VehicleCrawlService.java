@@ -4,17 +4,20 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kacpers.cars.feign.CopartClient;
-import com.kacpers.cars.feign.CopartSession;
 import com.kacpers.cars.feign.request.LotSearchRequest;
-import com.kacpers.cars.model.LotVehicle;
-import feign.Response;
+import com.kacpers.cars.feign.response.LotDetailsResponse;
+import com.kacpers.cars.feign.response.LotSearchResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import org.openqa.selenium.Proxy;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.CapabilityType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -22,44 +25,50 @@ public class VehicleCrawlService {
 
     private final static Integer MAX_RETRIES = 3;
 
-    private final CopartClient copartClient;
+    private Optional<String> copartSession = Optional.empty();
 
-    private final CopartSession copartSession;
+    private final CopartClient copartClient;
 
     private final ObjectMapper objectMapper;
 
-    public String revalidateCopartSession() {
-        int retries = 0;
-        Response response = copartClient.fetchCookies();
-        while (response.status() != 200) {
-            response = copartClient.fetchCookies();
-            retries++;
+    public synchronized String getCopartSession() {
+        if (copartSession.isPresent()) return copartSession.get();
 
-            if (retries >= MAX_RETRIES) {
-                throw new RuntimeException("Failed to fetch cookies after " + retries + " retries");
-            }
-        }
+        ChromeOptions options = new ChromeOptions();
 
-        String sessionId = response.headers()
-                .get("Set-Cookie")
-                .stream()
-                .filter(x -> x.startsWith("incap_ses"))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No incap_ses cookie found"));
+        options.setProxy(new Proxy().setHttpProxy("79.76.105.113:3128"));
+        WebDriver driver = new ChromeDriver(options);
+        driver.get("https://www.copart.ca");
 
-        copartSession.setSessionId(Optional.of(sessionId));
+        String sessionId = driver.manage()
+            .getCookies()
+            .stream()
+            .filter(cookie -> cookie.getName().startsWith("incap_ses"))
+            .map(cookie -> String.format("%s=%s;", cookie.getName(), cookie.getValue()))
+            .findFirst()
+            .orElseThrow(() -> new RuntimeException("Incap session not found"));
+
+        driver.quit();
+        copartSession = Optional.of(sessionId);
         return sessionId;
     }
 
     @SneakyThrows
-    public Set<LotVehicle> fetchVehicles() {
-        String sessionId = copartSession.getSessionId().orElse(revalidateCopartSession());
-        LotSearchRequest request = LotSearchRequest.latest();
+    public LotSearchResponse fetchVehicles(LotSearchRequest request) {
+        String sessionId = getCopartSession();
 
         int retries = 0;
-        ResponseEntity<String> response = copartClient.search(request, sessionId);
-        while (!response.getStatusCode().is2xxSuccessful()) {
+        ResponseEntity<String> response = null;
+
+        try {
             response = copartClient.search(request, sessionId);
+        } catch (Exception ignored) {
+        }
+
+        while (response == null || !response.getStatusCode().is2xxSuccessful()) {
+            try {
+                response = copartClient.search(request, sessionId);
+            } catch (Exception ignored) {}
             retries++;
 
             if (retries >= MAX_RETRIES) {
@@ -69,7 +78,32 @@ public class VehicleCrawlService {
 
         // Sneaky json parsing
         JsonNode rootNode = objectMapper.readTree(response.getBody());
-        JsonNode vehiclesNode = rootNode.get("data").get("results").get("content");
+        JsonNode vehiclesNode = rootNode.get("data").get("results");
         return objectMapper.readValue(vehiclesNode.toString(), new TypeReference<>() {});
+    }
+
+    public LotDetailsResponse fetchVehicleDetails(Long lotNumber) {
+        String sessionId = getCopartSession();
+
+        int retries = 0;
+        ResponseEntity<LotDetailsResponse> response = null;
+
+        try {
+            response = copartClient.details(lotNumber, sessionId);
+        } catch (Exception ignored) {
+        }
+
+        while (response == null || !response.getStatusCode().is2xxSuccessful()) {
+            try {
+                response = copartClient.details(lotNumber, sessionId);
+            } catch (Exception ignored) {}
+            retries++;
+
+            if (retries >= MAX_RETRIES) {
+                throw new RuntimeException("Failed to fetch lot vehicle details after " + retries + " retries");
+            }
+        }
+
+        return response.getBody();
     }
 }

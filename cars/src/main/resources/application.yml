@@ -5,12 +5,12 @@ spring:
         url: jdbc:postgresql://localhost:5432/postgres
         username: user
         password: password
-#    liquibase:
-#        change-log: classpath:db/changelog/liquibase-master.xml
+    liquibase:
+        change-log: classpath:db/changelog/liquibase-master.sql
     jpa:
         open-in-view: false
-        hibernate.ddl-auto: create
-        show-sql: true
+        hibernate.ddl-auto: validate
+        show-sql: false
     jackson:
         mapper:
             accept-case-insensitive-enums: true
