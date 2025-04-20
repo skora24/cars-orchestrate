@@ -18,6 +18,8 @@ public class SingleLotSearchToLotVehicleConverter implements Converter<LotSearch
 
         return LotVehicle
             .builder()
+            .createdAt(OffsetDateTime.now())
+            .updatedAt(OffsetDateTime.now())
             .lotNumber(src.ln())
             .carFaxReportAvailable(src.carFaxReportAvailable())
             .lotSold(src.dynamicLotDetails().lotSold())

@@ -10,7 +10,9 @@ spring:
     jpa:
         open-in-view: false
         hibernate.ddl-auto: validate
-        show-sql: false
+        show-sql: true
     jackson:
         mapper:
             accept-case-insensitive-enums: true
+    profiles:
+        active: prod

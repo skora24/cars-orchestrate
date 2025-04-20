@@ -2,6 +2,7 @@ package com.kacpers.cars.feign;
 
 import com.kacpers.cars.feign.request.LotSearchRequest;
 import com.kacpers.cars.feign.response.LotDetailsResponse;
+import com.kacpers.cars.feign.response.LotImagesResponse;
 import feign.Response;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.http.ResponseEntity;
@@ -37,4 +38,12 @@ public interface CopartClient {
             produces = "application/json"
     )
     ResponseEntity<LotDetailsResponse> details(@PathVariable Long lotNumber, @RequestHeader("Cookie") String cookies);
+
+    @RequestMapping(
+            value = "/public/data/lotdetails/solr/lotImages/{lotNumber}",
+            method = RequestMethod.GET,
+            consumes = "application/json",
+            produces = "application/json"
+    )
+    ResponseEntity<LotImagesResponse> images(@PathVariable Long lotNumber, @RequestHeader("Cookie") String cookies);
 }

@@ -1,26 +1,31 @@
 package com.kacpers.cars.model;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.OffsetDateTime;
+import java.util.Set;
 
 @Entity
 @Getter
+@Setter
 @Builder
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
 @ToString
@@ -44,6 +49,9 @@ public class LotVehicle {
 
     @Column(unique = true)
     private Long lotNumber;
+
+    @OneToMany(mappedBy = "vehicle", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private Set<LotImage> images;
 
     private Boolean carFaxReportAvailable;
 

@@ -56,3 +56,20 @@ CREATE TABLE lot_vehicle (
 );
 
 -- rollback DROP TABLE lot_vehicle; DROP SEQUENCE vehicle_sequence_generator;
+
+-- changeset kacper:create_lot_image_table
+CREATE SEQUENCE image_sequence_generator START WITH 10 INCREMENT BY 100;
+
+CREATE TABLE lot_image (
+     id BIGINT PRIMARY KEY DEFAULT nextval('image_sequence_generator'),
+     created_at TIMESTAMP WITH TIME ZONE,
+     updated_at TIMESTAMP WITH TIME ZONE,
+     lot_vehicle_id BIGINT,
+     url VARCHAR(255),
+     high_res_url VARCHAR(255),
+     thumbnail_url VARCHAR(255),
+     sequence_number INTEGER,
+     FOREIGN KEY (lot_vehicle_id) REFERENCES lot_vehicle(id)
+);
+
+-- rollback DROP TABLE lot_image; DROP SEQUENCE image_sequence_generator;

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kacpers.cars.feign.CopartClient;
 import com.kacpers.cars.feign.request.LotSearchRequest;
 import com.kacpers.cars.feign.response.LotDetailsResponse;
+import com.kacpers.cars.feign.response.LotImagesResponse;
 import com.kacpers.cars.feign.response.LotSearchResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
@@ -13,7 +14,6 @@ import org.openqa.selenium.Proxy;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
-import org.openqa.selenium.remote.CapabilityType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -37,6 +37,7 @@ public class VehicleCrawlService {
         ChromeOptions options = new ChromeOptions();
 
         options.setProxy(new Proxy().setHttpProxy("79.76.105.113:3128"));
+        options.addArguments("--headless=new");
         WebDriver driver = new ChromeDriver(options);
         driver.get("https://www.copart.ca");
 
@@ -101,6 +102,31 @@ public class VehicleCrawlService {
 
             if (retries >= MAX_RETRIES) {
                 throw new RuntimeException("Failed to fetch lot vehicle details after " + retries + " retries");
+            }
+        }
+
+        return response.getBody();
+    }
+
+    public LotImagesResponse fetchVehicleImages(Long lotNumber) {
+        String sessionId = getCopartSession();
+
+        int retries = 0;
+        ResponseEntity<LotImagesResponse> response = null;
+
+        try {
+            response = copartClient.images(lotNumber, sessionId);
+        } catch (Exception ignored) {
+        }
+
+        while (response == null || !response.getStatusCode().is2xxSuccessful()) {
+            try {
+                response = copartClient.images(lotNumber, sessionId);
+            } catch (Exception ignored) {}
+            retries++;
+
+            if (retries >= MAX_RETRIES) {
+                throw new RuntimeException("Failed to fetch lot vehicle images after " + retries + " retries");
             }
         }
 

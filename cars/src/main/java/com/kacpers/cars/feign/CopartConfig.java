@@ -52,8 +52,8 @@ public class CopartConfig {
         return template -> template.headers(headers);
     }
 
-    @Bean
-    public Client feignClientCopart() {
-        return new DynamicProxyClient(proxySelector);
-    }
+//    @Bean
+//    public Client feignClientCopart() {
+//        return new DynamicProxyClient(proxySelector);
+//    }
 }
