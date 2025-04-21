@@ -1,6 +1,9 @@
 package com.kacpers.cars;
 
+import com.kacpers.cars.model.LotImage;
 import com.kacpers.cars.model.LotVehicle;
+import com.kacpers.cars.repository.VehicleRepository;
+import com.kacpers.cars.service.ImageService;
 import com.kacpers.cars.service.VehicleService;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Assertions;
@@ -49,6 +52,12 @@ class VehicleServiceTest {
     @Autowired
     private VehicleService vehicleService;
 
+    @Autowired
+    private ImageService imageService;
+
+    @Autowired
+    private VehicleRepository vehicleRepository;
+
     @Test
     void testUpsert() {
         vehicleService.bulkUpsertVehicles(
@@ -65,7 +74,7 @@ class VehicleServiceTest {
                     .build()
             )
         );
-        List<LotVehicle> preUpdate = vehicleService.vehicles();
+        List<LotVehicle> preUpdate = vehicleRepository.findAll();
 
         vehicleService.bulkUpsertVehicles(
             List.of(
@@ -76,7 +85,7 @@ class VehicleServiceTest {
                 .build()
             )
         );
-        List<LotVehicle> postUpdate = vehicleService.vehicles();
+        List<LotVehicle> postUpdate = vehicleRepository.findAll();
 
         LotVehicle preVehicleId1 = preUpdate.stream().filter(v -> v.getLotNumber().equals(1L)).findFirst().orElseThrow();
         LotVehicle postVehicleId1 = postUpdate.stream().filter(v -> v.getLotNumber().equals(1L)).findFirst().orElseThrow();
@@ -87,4 +96,34 @@ class VehicleServiceTest {
         Assertions.assertEquals(2000, preVehicleId1.getUpdatedAt().getYear());
     }
 
+    @Test
+    void testImagesFetch() {
+        vehicleService.bulkUpsertVehicles(
+            List.of(
+                LotVehicle
+                    .builder()
+                    .updatedAt(OffsetDateTime.of(2000, 12, 1, 6, 0, 0 ,0, ZoneOffset.of("+02:00")))
+                    .lotNumber(1L)
+                    .build(),
+                LotVehicle
+                    .builder()
+                    .updatedAt(OffsetDateTime.of(2000, 12, 1, 6, 0, 0 ,0, ZoneOffset.of("+02:00")))
+                    .lotNumber(2L)
+                    .build()
+            )
+        );
+
+        imageService.bulkInsertImages(
+            List.of(
+                LotImage
+                    .builder()
+                    .url("url")
+                    .build()
+            ),
+            1L
+        );
+
+        System.out.println(imageService.findAll());
+        System.out.println(vehicleRepository.findWithImagesById(1L));
+    }
 }

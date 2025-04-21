@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import java.time.OffsetDateTime;
 
 @Service
-public class SingleLotImageToLotVehicleConverter implements Converter<LotImagesResponse.Content, LotImage> {
+public class SingleLotImageToLotImageConverter implements Converter<LotImagesResponse.Content, LotImage> {
     @Override
     public LotImage convert(MappingContext<LotImagesResponse.Content, LotImage> mappingContext) {
         LotImagesResponse.Content src = mappingContext.getSource();

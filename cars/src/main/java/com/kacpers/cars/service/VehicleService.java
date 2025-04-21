@@ -5,6 +5,8 @@ import com.kacpers.cars.repository.VehicleRepository;
 import jakarta.annotation.Nullable;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.jdbc.core.BatchPreparedStatementSetter;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -22,8 +24,8 @@ public class VehicleService {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public List<LotVehicle> vehicles() {
-        return vehicleRepository.findAll();
+    public Page<LotVehicle> vehicles(Pageable pageable) {
+        return vehicleRepository.findWithImages(pageable);
     }
 
     @Transactional

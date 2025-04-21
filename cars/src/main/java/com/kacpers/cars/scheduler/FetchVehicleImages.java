@@ -1,7 +1,9 @@
 package com.kacpers.cars.scheduler;
 
 import com.kacpers.cars.feign.response.LotImagesResponse;
+import com.kacpers.cars.model.LotImage;
 import com.kacpers.cars.model.LotVehicle;
+import com.kacpers.cars.service.ImageService;
 import com.kacpers.cars.service.ImagesQueueService;
 import com.kacpers.cars.service.VehicleCrawlService;
 import com.kacpers.cars.service.VehicleService;
@@ -15,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
@@ -25,7 +28,7 @@ public class FetchVehicleImages {
 
     private final ModelMapper modelMapper;
 
-    private final VehicleService vehicleService;
+    private final ImageService imageService;
 
     private final ImagesQueueService queueService;
 
@@ -43,12 +46,13 @@ public class FetchVehicleImages {
         LotImagesResponse searched = vehicleCrawlService
             .fetchVehicleImages(lotNumber);
 
-        LotVehicle vehicle = modelMapper.map(searched, LotVehicle.class);
+        List<LotImage> images = searched.data().imagesList().content()
+            .stream()
+            .map(i -> modelMapper.map(i, LotImage.class))
+            .toList();
 
-        log.info("Fetched vehicle details for lot number {}", lotNumber);
-        vehicleService.bulkUpsertVehicles(List.of(vehicle));
-
-        queueService.enqueue(lotNumber);
+        log.info("Fetched vehicle images for lot number {}", lotNumber);
+        imageService.bulkInsertImages(images, lotNumber);
     }
 
 }

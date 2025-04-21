@@ -4,6 +4,7 @@ import com.kacpers.cars.feign.request.LotSearchRequest;
 import com.kacpers.cars.feign.response.LotSearchResponse;
 import com.kacpers.cars.model.LotVehicle;
 import com.kacpers.cars.service.DetailsQueueService;
+import com.kacpers.cars.service.ImagesQueueService;
 import com.kacpers.cars.service.VehicleCrawlService;
 import com.kacpers.cars.service.VehicleService;
 import lombok.RequiredArgsConstructor;
@@ -31,7 +32,9 @@ public class FetchVehicles {
 
     private final VehicleService vehicleService;
 
-    private final DetailsQueueService queueService;
+    private final DetailsQueueService detailsQueueService;
+
+    private final ImagesQueueService imagesQueueService;
 
     private Integer currentPage = 0;
 
@@ -56,7 +59,10 @@ public class FetchVehicles {
 
         vehicles.stream()
             .map(LotVehicle::getLotNumber)
-            .forEach(queueService::enqueueMoveToEnd);
+            .forEach(ln -> {
+                detailsQueueService.enqueueMoveToEnd(ln);
+                imagesQueueService.enqueueMoveToEnd(ln);
+            });
 
         numberOfFoundOnPage.addLast(searched.size());
         changePage();

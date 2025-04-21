@@ -43,7 +43,7 @@ public class FetchVehicleDetails {
         LotDetailsResponse searched = vehicleCrawlService
             .fetchVehicleDetails(lotNumber);
 
-        LotVehicle vehicle = modelMapper.map(searched, LotVehicle.class);
+        LotVehicle vehicle = modelMapper.map(searched.data().lotDetails(), LotVehicle.class);
 
         log.info("Fetched vehicle details for lot number {}", lotNumber);
         vehicleService.bulkUpsertVehicles(List.of(vehicle));

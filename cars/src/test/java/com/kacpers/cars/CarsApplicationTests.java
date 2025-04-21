@@ -71,14 +71,14 @@ class CarsApplicationTests {
 
     @Test
     void contextLoads() {
-//        System.out.println(vehicleCrawlService.fetchVehicleImages(89405695L));
-        LotImage lotImage = LotImage.builder().build();
-        LotVehicle lotVehicle = LotVehicle.builder().lotNumber(1L).build();
-        lotVehicle = vehicleRepository.save(lotVehicle);
-        lotVehicle.setImages(Set.of(lotImage));
-        vehicleRepository.save(lotVehicle);
-        LotVehicle v = vehicleRepository.fetchWithImagesById(10L);
-        System.out.println(v);
+        System.out.println(vehicleCrawlService.fetchVehicleDetails(48728465L));
+//        LotImage lotImage = LotImage.builder().build();
+//        LotVehicle lotVehicle = LotVehicle.builder().lotNumber(1L).build();
+//        lotVehicle = vehicleRepository.save(lotVehicle);
+//        lotVehicle.setImages(Set.of(lotImage));
+//        vehicleRepository.save(lotVehicle);
+//        LotVehicle v = vehicleRepository.fetchWithImagesById(10L);
+//        System.out.println(v);
 //        System.out.println(imageRepository.findAll());
     }
 

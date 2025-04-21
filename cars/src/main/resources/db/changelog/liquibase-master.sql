@@ -68,8 +68,7 @@ CREATE TABLE lot_image (
      url VARCHAR(255),
      high_res_url VARCHAR(255),
      thumbnail_url VARCHAR(255),
-     sequence_number INTEGER,
-     FOREIGN KEY (lot_vehicle_id) REFERENCES lot_vehicle(id)
+     sequence_number INTEGER
 );
 
 -- rollback DROP TABLE lot_image; DROP SEQUENCE image_sequence_generator;
